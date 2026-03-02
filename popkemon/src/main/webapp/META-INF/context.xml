@@ -4,9 +4,9 @@
               auth="Container"
               type="javax.sql.DataSource"
               driverClassName="com.mysql.cj.jdbc.Driver"
-              url="jdbc:mysql://localhost:3306/popkemon"
-              username="popkemon_user"
-              password="Popkemon2025!"
+              url="jdbc:mysql://localhost:3306/tiendainfo"
+              username="root"
+              password="1234"
               maxTotal="20"
               maxIdle="10"
               maxWaitMillis="10000" />
