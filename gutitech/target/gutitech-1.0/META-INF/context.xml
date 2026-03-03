@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <Resource name="jdbc/MySQLDS"
+              auth="Container"
+              type="javax.sql.DataSource"
+              driverClassName="com.mysql.cj.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/tienda_on_line"
+              username="root"
+              password="1234"
+              maxTotal="20"
+              maxIdle="10"
+              maxWaitMillis="10000" />
+</Context>
