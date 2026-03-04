@@ -1,0 +1,11 @@
+com.guti
+com.guti.beans
+com.guti.db
+com.guti.db.daos
+com.guti.dto
+com.guti.events
+com.guti.filters
+com.guti.security
+com.guti.service
+com.guti.servlets
+com.guti.utils

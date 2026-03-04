@@ -4,9 +4,9 @@
               auth="Container"
               type="javax.sql.DataSource"
               driverClassName="com.mysql.cj.jdbc.Driver"
-              url="jdbc:mysql://localhost:3306/tienda_on_line"
-              username="root"
-              password="1234"
+              url="jdbc:mysql://localhost:3306/gutitech"
+              username="gutitech_user"
+              password="gutitech123"
               maxTotal="20"
               maxIdle="10"
               maxWaitMillis="10000" />

@@ -142,11 +142,17 @@
     document.getElementById("nif").addEventListener("blur", function() {
         var numeros = this.value.replace(/\D/g, "");
         if (numeros.length !== 8) return;
-        var letras = "TRWAGMYFPDXBNJZSQVHLCKE";
-        var letra = letras[parseInt(numeros) % 23];
-        this.value = numeros + letra;
-        document.getElementById("mensajeNif").textContent = "Letra asignada: " + letra;
-        document.getElementById("mensajeNif").className = "aviso ok";
+        var input = this;
+
+        fetch("ajax?accion=calcularLetraNif&numeros=" + numeros)
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.letra) {
+                    input.value = numeros + data.letra;
+                    document.getElementById("mensajeNif").textContent = "Letra asignada: " + data.letra;
+                    document.getElementById("mensajeNif").className = "aviso ok";
+                }
+            });
     });
 </script>
 

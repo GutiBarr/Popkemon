@@ -7,6 +7,7 @@ com\guti\Main.class
 com\guti\events\StartListener.class
 com\guti\servlets\CarritoServlet.class
 com\guti\servlets\LoginServlet.class
+com\guti\utils\CarritoAnonimo$LineaAnonima.class
 com\guti\beans\Categoria.class
 com\guti\servlets\HashServlet.class
 com\guti\servlets\LogoutServlet.class
@@ -14,8 +15,11 @@ com\guti\servlets\AjaxServlet.class
 com\guti\security\PasswordHasher.class
 com\guti\servlets\TiendaServlet.class
 com\guti\beans\Pedido.class
+com\guti\utils\CarritoAnonimo.class
+com\guti\servlets\MediaServlet.class
 com\guti\db\daos\PedidoDAO.class
 com\guti\db\daos\CategoriaDAO.class
+com\guti\utils\CarritoAnonimo$1.class
 com\guti\servlets\ProductoServlet.class
 com\guti\beans\Producto.class
 com\guti\filters\JSPFilter.class

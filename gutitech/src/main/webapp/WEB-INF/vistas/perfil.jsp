@@ -64,7 +64,7 @@
 
             <label for="avatar">Cambiar avatar</label>
             <c:if test="${not empty usuario.avatar}">
-                <img src="media?archivo=${usuario.avatar}" alt="Avatar" class="avatar-preview" />
+                <img src="media/${usuario.avatar}" alt="Avatar" class="avatar-preview" />
             </c:if>
             <input type="file" id="avatar" name="avatar" accept="image/jpeg,image/png,image/webp" />
 

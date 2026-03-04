@@ -19,7 +19,12 @@
             <a href="carrito">Carrito</a>
             <c:choose>
                 <c:when test="${not empty sessionScope.usuario}">
-                    <a href="perfil">${sessionScope.usuario.nombre}</a>
+                    <a href="perfil" class="nav-usuario">
+    <c:if test="${not empty sessionScope.usuario.avatar}">
+        <img src="media/${sessionScope.usuario.avatar}" class="avatar-nav" />
+    </c:if>
+    ${sessionScope.usuario.nombre}
+</a>
                     <a href="pedidos">Mis Pedidos</a>
                     <a href="logout">Cerrar sesion</a>
                 </c:when>

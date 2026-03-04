@@ -17,7 +17,12 @@
         <nav>
             <a href="tienda">Tienda</a>
             <a href="carrito">Carrito</a>
-            <a href="perfil">${sessionScope.usuario.nombre}</a>
+            <a href="perfil" class="nav-usuario">
+    <c:if test="${not empty sessionScope.usuario.avatar}">
+        <img src="media/${sessionScope.usuario.avatar}" class="avatar-nav" />
+    </c:if>
+    ${sessionScope.usuario.nombre}
+</a>
             <a href="pedidos">Mis Pedidos</a>
             <a href="logout">Cerrar sesion</a>
         </nav>

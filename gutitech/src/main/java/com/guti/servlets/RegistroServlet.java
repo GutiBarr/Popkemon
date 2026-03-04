@@ -21,6 +21,29 @@ import javax.servlet.http.Part;
 import com.guti.beans.Usuario;
 import com.guti.service.AuthService;
 
+/**
+ * Servlet que gestiona el registro de nuevos usuarios.
+ * <p>
+ * El GET muestra el formulario de registro. El POST valida los datos
+ * en el servidor, gestiona la subida opcional del avatar y delega
+ * el hashing de la contraseña e inserción en BD a {@link AuthService#registrar}.
+ * </p>
+ * <p>
+ * La anotación {@code @MultipartConfig} habilita el soporte para formularios
+ * con {@code enctype="multipart/form-data"}, necesario para la subida del avatar.
+ * Los límites configurados son:
+ * </p>
+ * <ul>
+ *   <li>Umbral de escritura en disco: 2 MB</li>
+ *   <li>Tamaño máximo de archivo: 5 MB</li>
+ *   <li>Tamaño máximo de la petición completa: 10 MB</li>
+ * </ul>
+ * <p>URL de acceso: {@code /registro}</p>
+ *
+ * @author José María Gutiérrez Barrena
+ * @version 1.0
+ * @see com.guti.service.AuthService
+ */
 @WebServlet(urlPatterns = {"/registro"})
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024 * 2,
@@ -29,14 +52,56 @@ import com.guti.service.AuthService;
 )
 public class RegistroServlet extends HttpServlet {
 
-    private static final String RUTA_AVATARES = System.getProperty("user.home") + File.separator + "popkemon_uploads";
+    /**
+     * Ruta absoluta al directorio donde se almacenan los avatares subidos
+     * durante el registro. Se construye a partir de la propiedad
+     * {@code user.home} del sistema.
+     */
+    private static final String RUTA_AVATARES =
+            System.getProperty("user.home") + File.separator + "popkemon_uploads";
 
+    /**
+     * Muestra el formulario de registro de nuevos usuarios.
+     *
+     * @param req  petición HTTP
+     * @param resp respuesta HTTP
+     * @throws ServletException si ocurre un error en el servlet
+     * @throws IOException      si ocurre un error de entrada/salida
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         req.getRequestDispatcher("WEB-INF/vistas/registro.jsp").forward(req, resp);
     }
 
+    /**
+     * Procesa el formulario de registro de un nuevo usuario.
+     * <p>
+     * Flujo de ejecución:
+     * </p>
+     * <ol>
+     *   <li>Valida en el servidor que todos los campos obligatorios estén rellenos.</li>
+     *   <li>Comprueba que las contraseñas introducidas coincidan.</li>
+     *   <li>Si se ha subido un avatar con tipo MIME válido (JPEG, PNG o WebP),
+     *       genera un nombre único con {@link UUID} y lo guarda en
+     *       {@link #RUTA_AVATARES}, creando la carpeta si no existe.</li>
+     *   <li>Construye el objeto {@link Usuario} con los datos del formulario
+     *       y la contraseña aún en texto plano.</li>
+     *   <li>Llama a {@link AuthService#registrar}, que comprueba si el email
+     *       ya existe, hashea la contraseña con Argon2id e inserta el usuario en BD.</li>
+     *   <li>Si el email ya está registrado, redirige al formulario con un mensaje de error.</li>
+     *   <li>Si el registro es correcto, redirige al login con un mensaje de confirmación.</li>
+     * </ol>
+     * <p>
+     * En todos los casos se aplica el patrón Post/Redirect/Get para evitar
+     * reenvíos del formulario al recargar la página.
+     * </p>
+     *
+     * @param req  petición multipart con todos los campos del formulario de registro
+     * @param resp respuesta HTTP
+     * @throws ServletException si ocurre un error en el servlet
+     * @throws IOException      si ocurre un error al guardar el avatar o redirigir
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -77,7 +142,7 @@ public class RegistroServlet extends HttpServlet {
             String mime = avatar.getContentType();
             if (mime.equals("image/jpeg") || mime.equals("image/png") || mime.equals("image/webp")) {
                 String extension = mime.equals("image/png") ? ".png" : mime.equals("image/webp") ? ".webp" : ".jpg";
-                nombreAvatar = UUID.randomUUID().toString() + extension;
+                nombreAvatar = UUID.randomUUID().toString().substring(0, 8) + extension;
                 File carpeta = new File(RUTA_AVATARES);
                 if (!carpeta.exists()) carpeta.mkdirs();
                 Path destino = Paths.get(RUTA_AVATARES, nombreAvatar);

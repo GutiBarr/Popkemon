@@ -11,6 +11,7 @@ c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\db\daos\UsuarioDA
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\dto\UsuarioSessionDTO.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\events\StartListener.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\filters\AuthFilter.java
+c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\filters\EncodingFilter.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\filters\JSPFilter.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\Main.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\security\PasswordHasher.java
@@ -20,8 +21,10 @@ c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\servlets\CarritoS
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\servlets\HashServlet.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\servlets\LoginServlet.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\servlets\LogoutServlet.java
+c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\servlets\MediaServlet.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\servlets\PedidosServlet.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\servlets\PerfilServlet.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\servlets\ProductoServlet.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\servlets\RegistroServlet.java
 c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\servlets\TiendaServlet.java
+c:\Users\Guti\Desktop\Gutitech\gutitech\src\main\java\com\guti\utils\CarritoAnonimo.java

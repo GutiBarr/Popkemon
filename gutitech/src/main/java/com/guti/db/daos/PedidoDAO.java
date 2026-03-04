@@ -16,12 +16,37 @@ import com.guti.beans.Pedido;
 import com.guti.beans.Producto;
 import com.guti.db.Conexion;
 
+/**
+ * DAO para la gestión de pedidos y líneas de pedido en la base de datos.
+ * <p>
+ * Gestiona el ciclo de vida completo de un pedido: creación del carrito,
+ * añadir y eliminar líneas, actualizar cantidades, vaciar el carrito
+ * y finalizar el pedido. Todas las operaciones de escritura se ejecutan
+ * dentro de transacciones explícitas con {@code setAutoCommit(false)}.
+ * </p>
+ * <p>
+ * Un pedido en estado {@code 'c'} es el carrito activo del usuario.
+ * Al confirmar la compra el estado cambia a {@code 'f'} (finalizado).
+ * </p>
+ *
+ * @author José María Gutiérrez Barrena
+ * @version 1.0
+ * @see com.guti.beans.Pedido
+ * @see com.guti.beans.LineaPedido
+ * @see com.guti.db.Conexion
+ */
 public class PedidoDAO {
 
-    /*
-     * =====================================
-     * OBTENER CARRITO ACTIVO DEL USUARIO
-     * =====================================
+    /**
+     * Obtiene el carrito activo (estado {@code 'c'}) de un usuario.
+     * <p>
+     * Carga también las líneas del pedido mediante {@link #obtenerLineas},
+     * que hace un JOIN con {@code productos} y {@code categorias}.
+     * </p>
+     *
+     * @param idUsuario identificador del usuario
+     * @return el pedido en estado carrito con sus líneas cargadas,
+     *         o {@code null} si el usuario no tiene carrito abierto
      */
     public Pedido obtenerCarrito(int idUsuario) {
 
@@ -57,10 +82,16 @@ public class PedidoDAO {
         return null;
     }
 
-    /*
-     * =====================================
-     * OBTENER PEDIDOS FINALIZADOS DEL USUARIO
-     * =====================================
+    /**
+     * Recupera el historial de pedidos finalizados de un usuario.
+     * <p>
+     * Devuelve los pedidos con estado {@code 'f'} ordenados por fecha
+     * descendente. Cada pedido incluye sus líneas de detalle.
+     * </p>
+     *
+     * @param idUsuario identificador del usuario
+     * @return lista de pedidos finalizados con sus líneas,
+     *         o lista vacía si no tiene ninguno
      */
     public List<Pedido> obtenerPedidosFinalizados(int idUsuario) {
 
@@ -99,10 +130,16 @@ public class PedidoDAO {
         return pedidos;
     }
 
-    /*
-     * =====================================
-     * CREAR CARRITO NUEVO
-     * =====================================
+    /**
+     * Crea un nuevo carrito vacío para un usuario.
+     * <p>
+     * Inserta un pedido con estado {@code 'c'}, fecha actual e importes a cero.
+     * Usa {@code RETURN_GENERATED_KEYS} para recuperar el identificador
+     * generado automáticamente por la base de datos.
+     * </p>
+     *
+     * @param idUsuario identificador del usuario
+     * @return el nuevo pedido creado, o {@code null} si la inserción falla
      */
     public Pedido crearCarrito(int idUsuario) {
 
@@ -136,15 +173,23 @@ public class PedidoDAO {
         return null;
     }
 
-    /*
-     * =====================================
-     * AÑADIR PRODUCTO AL CARRITO
-     * =====================================
+    /**
+     * Añade un producto al carrito o incrementa su cantidad si ya existe.
+     * <p>
+     * Comprueba primero si el producto ya tiene línea en el pedido.
+     * Si existe, suma la cantidad indicada. Si no, inserta una nueva línea.
+     * Al terminar recalcula el importe total del pedido con {@link #actualizarImporte}.
+     * </p>
+     *
+     * @param idPedido   identificador del pedido (carrito)
+     * @param idProducto identificador del producto a añadir
+     * @param cantidad   número de unidades a añadir
+     * @return {@code true} si la operación fue correcta, {@code false} si hubo error
      */
     public boolean añadirLinea(int idPedido, int idProducto, int cantidad) {
 
         // Si ya existe la línea, sumamos cantidad
-        String sqlCheck = "SELECT IdLinea, Cantidad FROM lineaspedidos WHERE IdPedido = ? AND IdProducto = ?";
+        String sqlCheck  = "SELECT IdLinea, Cantidad FROM lineaspedidos WHERE IdPedido = ? AND IdProducto = ?";
         String sqlUpdate = "UPDATE lineaspedidos SET Cantidad = Cantidad + ? WHERE IdLinea = ?";
         String sqlInsert = "INSERT INTO lineaspedidos (IdPedido, IdProducto, Cantidad) VALUES (?, ?, ?)";
 
@@ -180,10 +225,17 @@ public class PedidoDAO {
         }
     }
 
-    /*
-     * =====================================
-     * ACTUALIZAR CANTIDAD DE UNA LINEA
-     * =====================================
+    /**
+     * Actualiza la cantidad de unidades de una línea del carrito.
+     * <p>
+     * Tras modificar la cantidad recalcula el importe total del pedido
+     * al que pertenece la línea mediante {@link #actualizarImporte}.
+     * Se usa desde el carrito con los botones Ajax de + y -.
+     * </p>
+     *
+     * @param idLinea  identificador de la línea a modificar
+     * @param cantidad nueva cantidad de unidades (mínimo 1)
+     * @return {@code true} si la actualización fue correcta, {@code false} si hubo error
      */
     public boolean actualizarCantidad(int idLinea, int cantidad) {
 
@@ -211,10 +263,15 @@ public class PedidoDAO {
         }
     }
 
-    /*
-     * =====================================
-     * ELIMINAR LINEA DEL CARRITO
-     * =====================================
+    /**
+     * Elimina una línea concreta del carrito.
+     * <p>
+     * Antes de borrar la línea obtiene el identificador del pedido
+     * para poder recalcular el importe total tras la eliminación.
+     * </p>
+     *
+     * @param idLinea identificador de la línea a eliminar
+     * @return {@code true} si la eliminación fue correcta, {@code false} si hubo error
      */
     public boolean eliminarLinea(int idLinea) {
 
@@ -239,10 +296,16 @@ public class PedidoDAO {
         }
     }
 
-    /*
-     * =====================================
-     * VACIAR CARRITO ENTERO
-     * =====================================
+    /**
+     * Vacía completamente el carrito eliminando sus líneas y el propio pedido.
+     * <p>
+     * Primero borra todas las líneas de {@code lineaspedidos} y después
+     * elimina el registro del pedido de {@code pedidos}.
+     * Ambas operaciones se ejecutan en la misma transacción.
+     * </p>
+     *
+     * @param idPedido identificador del pedido a vaciar y eliminar
+     * @return {@code true} si la operación fue correcta, {@code false} si hubo error
      */
     public boolean vaciarCarrito(int idPedido) {
 
@@ -270,10 +333,15 @@ public class PedidoDAO {
         }
     }
 
-    /*
-     * =====================================
-     * FINALIZAR PEDIDO
-     * =====================================
+    /**
+     * Cambia el estado de un pedido de carrito ({@code 'c'}) a finalizado ({@code 'f'}).
+     * <p>
+     * Actualiza también la fecha del pedido con la fecha actual del sistema,
+     * que pasa a ser la fecha oficial de compra.
+     * </p>
+     *
+     * @param idPedido identificador del pedido a finalizar
+     * @return {@code true} si la operación fue correcta, {@code false} si hubo error
      */
     public boolean finalizarPedido(int idPedido) {
 
@@ -297,10 +365,22 @@ public class PedidoDAO {
         }
     }
 
-    /*
-     * =====================================
-     * MÉTODOS PRIVADOS AUXILIARES
-     * =====================================
+    // =====================================================================
+    // MÉTODOS PRIVADOS AUXILIARES
+    // =====================================================================
+
+    /**
+     * Carga las líneas de detalle de un pedido reutilizando una conexión activa.
+     * <p>
+     * Realiza un JOIN entre {@code lineaspedidos}, {@code productos} y
+     * {@code categorias} para construir objetos completos sin consultas adicionales.
+     * Se llama siempre dentro de un bloque que ya tiene conexión abierta.
+     * </p>
+     *
+     * @param con      conexión activa a la base de datos
+     * @param idPedido identificador del pedido cuyas líneas se quieren cargar
+     * @return lista de líneas con sus productos y categorías completos
+     * @throws SQLException si ocurre un error al ejecutar la consulta
      */
     private List<LineaPedido> obtenerLineas(Connection con, int idPedido) throws SQLException {
 
@@ -345,6 +425,19 @@ public class PedidoDAO {
         return lineas;
     }
 
+    /**
+     * Recalcula y actualiza el importe e IVA de un pedido en la base de datos.
+     * <p>
+     * El importe se calcula como la suma de {@code Cantidad * Precio} de todas
+     * las líneas del pedido. El IVA se calcula aplicando el 21% sobre ese importe.
+     * Se usa {@code COALESCE} para devolver 0 si el carrito está vacío.
+     * Se llama siempre después de cualquier operación que modifique las líneas.
+     * </p>
+     *
+     * @param con      conexión activa a la base de datos
+     * @param idPedido identificador del pedido a recalcular
+     * @throws SQLException si ocurre un error al ejecutar la actualización
+     */
     private void actualizarImporte(Connection con, int idPedido) throws SQLException {
 
         String sql = """
@@ -371,6 +464,18 @@ public class PedidoDAO {
         ps.executeUpdate();
     }
 
+    /**
+     * Obtiene el identificador del pedido al que pertenece una línea.
+     * <p>
+     * Método auxiliar usado antes de eliminar o actualizar una línea,
+     * para poder recalcular el importe del pedido afectado.
+     * </p>
+     *
+     * @param con     conexión activa a la base de datos
+     * @param idLinea identificador de la línea
+     * @return identificador del pedido, o {@code -1} si la línea no existe
+     * @throws SQLException si ocurre un error al ejecutar la consulta
+     */
     private int obtenerIdPedidoDeLinea(Connection con, int idLinea) throws SQLException {
 
         String sql = "SELECT IdPedido FROM lineaspedidos WHERE IdLinea = ?";
@@ -385,7 +490,16 @@ public class PedidoDAO {
         return -1;
     }
 
-    public void anadirLinea(int idPedido, int idProducto, int cantidad) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    /**
+     * Alias de {@link #añadirLinea(int, int, int)} para compatibilidad
+     * con llamadas que no usan caracteres especiales en el nombre del método.
+     *
+     * @param idPedido   identificador del pedido (carrito)
+     * @param idProducto identificador del producto a añadir
+     * @param cantidad   número de unidades a añadir
+     * @return {@code true} si la operación fue correcta, {@code false} si hubo error
+     */
+    public boolean anadirLinea(int idPedido, int idProducto, int cantidad) {
+        return añadirLinea(idPedido, idProducto, cantidad);
     }
 }
